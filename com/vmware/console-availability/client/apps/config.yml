@@ -2,6 +2,8 @@
 
 #@ def labels():
 console-availability-client: ""
+app: "console-availability"
+service: console-availability-client
 #@ end
 
 ---
@@ -13,7 +15,9 @@ metadata:
 spec:
   ports:
   - port: #@ data.values.svc_port
+    protocol: TCP
     targetPort: #@ data.values.app_port
+    name: http-console-availability-client
   selector: #@ labels()
 ---
 apiVersion: apps/v1
@@ -21,6 +25,7 @@ kind: Deployment
 metadata:
   namespace: #@ data.values.namespace
   name: console-availability-client
+  labels: #@ labels()
 spec:
   selector:
     matchLabels: #@ labels()
@@ -39,6 +44,7 @@ spec:
             memory: 1Gi
         ports:
           - containerPort: 8080
+            name: http-console-availability-client
         livenessProbe:
           httpGet:
             port: 8080
