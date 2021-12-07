@@ -1,0 +1,65 @@
+#@ load("@ytt:data", "data")
+
+#@ def labels():
+app: "eshop"
+service: "eshop-db"
+#@ end
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  namespace: #@ data.values.namespace
+  name: mssql-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 30Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: #@ data.values.namespace
+  name: eshop-db
+  labels: #@ labels()
+spec:
+  replicas: 1
+  selector:
+    matchLabels: #@ labels()
+  template:
+    metadata:
+      labels: #@ labels()
+    spec:
+      hostname: mssqlinst
+      securityContext:
+        fsGroup: 10001
+      containers:
+      - image: mcr.microsoft.com/mssql/server:2019-CU14-ubuntu-18.04
+        name: eshop-db
+        env:
+        - name: ACCEPT_EULA
+          value: "Y"
+        - name: SA_PASSWORD
+          value: "TEMP_PASSWORD"
+        volumeMounts:
+        - name: mssqldb
+          mountPath: /var/opt/mssql
+        ports:
+        - containerPort: 1433
+      volumes:
+      - name: mssqldb
+        persistentVolumeClaim:
+          claimName: mssql-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: #@ data.values.namespace
+  name: eshop-db
+spec:
+  ports:
+  - port: #@ data.values.svc_port
+    targetPort: #@ data.values.app_port
+  selector: #@ labels()

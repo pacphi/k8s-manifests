@@ -1,0 +1,5 @@
+#@data/values
+---
+namespace: staging
+svc_port: 1433
+app_port: 1433

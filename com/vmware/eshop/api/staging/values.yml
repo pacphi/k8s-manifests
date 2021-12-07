@@ -1,0 +1,9 @@
+#@data/values
+---
+namespace: staging
+svc_port: 8080
+app_port: 8080
+api_base: eshop-api.staging.svc.cluster.local:8080/api/
+web_base: eshop-web.staging.svc.cluster.local:8080/
+catalog_connection: "Server=eshop-db.staging.svc.cluster.local,1433;User Id=sa;Password=TEMP_PASSWORD;Database=Microsoft.eShopOnWeb.CatalogDb;"
+identity_connection: "Server=eshop-db.staging.svc.cluster.local,1433;User Id=sa;Password=TEMP_PASSWORD;Database=Microsoft.eShopOnWeb.Identity;"

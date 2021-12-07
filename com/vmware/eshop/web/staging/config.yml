@@ -1,0 +1,49 @@
+#@ load("@ytt:data", "data")
+
+#@ def labels():
+app: "eshop"
+service: "eshop-web"
+#@ end
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: #@ data.values.namespace
+  name: eshop-web
+  labels: #@ labels()
+spec:
+  replicas: 1
+  selector:
+    matchLabels: #@ labels()
+  template:
+    metadata:
+      labels: #@ labels()
+    spec:
+      imagePullSecrets:
+      - name: registry-credentials
+      containers:
+      - image: harbor.klu.zoolabs.me/platform/apps/eshop-web@sha256:f50f0522e3629d7918a18bf4a5b344a2e883ef7aa1dba0bdaa5a27668f689324
+        name: eshop-web
+        ports:
+        - containerPort: 8080
+        env:
+          - name: baseUrls__apiBase
+            value: #@ data.values.api_base
+          - name: baseUrls__webBase
+            value: #@ data.values.web_base
+          - name: ConnectionStrings__CatalogConnection
+            value: #@ data.values.catalog_connection
+          - name: ConnectionStrings__IdentityConnection
+            value: #@ data.values.identity_connection
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: #@ data.values.namespace
+  name: eshop-web
+spec:
+  ports:
+  - port: #@ data.values.svc_port
+    targetPort: #@ data.values.app_port
+  selector: #@ labels()
